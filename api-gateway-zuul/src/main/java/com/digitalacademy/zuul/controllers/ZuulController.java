@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 
 @RestController
-@RequestMapping(path = "/user")
+@RequestMapping(path = "/zuul")
 public class ZuulController {
 
     // Further references are provided in `loanservice` project.
@@ -31,8 +31,8 @@ public class ZuulController {
 
     // This is just a rough example of how to handle the request from outside.
     // *** You SHOULD, obviously, modify this method (and also `Zuul` model) to suit your project ***
-    @GetMapping("/info/{id}")
-    public HttpEntity<ResponseModel> getUserById(@PathVariable Long id) {
+    @GetMapping("/{id}")
+    public HttpEntity<ResponseModel> getZuulById(@PathVariable Long id) {
         try {
             Zuul zuul = zuulService.getZuulById(id);
             StatusModel status = new StatusModel(
@@ -45,7 +45,7 @@ public class ZuulController {
 
             return ResponseEntity.ok(new ResponseModel(
                     new StatusModel(statusResponse.getCode(), statusResponse.getMessage()),
-                    "Error caused by user service"
+                    "Error caused by zuul service"
             ));
         } catch (Exception e) {
             StatusResponse statusResponse = StatusResponse.GET_TECHNICAL_ERROR_EXCEPTION;
