@@ -7,5 +7,23 @@ eureka:
     serviceUrl:
       defaultZone: http://localhost:8888/eureka/
 
-#zuul:
-#  routes:
+zuul:
+  ignoredServices: '*'
+  routes:
+      product-service:
+        path: /products/**
+        stripPrefix: false
+      loanservice:
+        path: /loan/**
+        stripPrefix: false
+
+
+
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+          include: routes,filters
+
