@@ -1,21 +1,27 @@
 package com.digitalacademy.zuul.filters;
 
 import com.netflix.zuul.ZuulFilter;
+import com.netflix.zuul.context.RequestContext;
+import com.netflix.zuul.exception.ZuulException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.stereotype.Component;
 
+
+import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.ERROR_TYPE;
+import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.SEND_ERROR_FILTER_ORDER;
+
+@Component
 public class ErrorFilter extends ZuulFilter {
-
     private static final Logger log = LogManager.getLogger(ErrorFilter.class.getName());
-
     @Override
     public String filterType() {
-        return "error";
+        return ERROR_TYPE;
     }
 
     @Override
     public int filterOrder() {
-        return 1;
+        return SEND_ERROR_FILTER_ORDER;
     }
 
     @Override
@@ -25,10 +31,12 @@ public class ErrorFilter extends ZuulFilter {
 
     @Override
     public Object run() {
-        log.error("Inside Route Filter");
-        log.error("Boom");
-
+        RequestContext ctx = RequestContext.getCurrentContext();
+        final Throwable throwable = ctx.getThrowable();
+        if (throwable instanceof ZuulException) {
+            ctx.remove("throwable");
+            ctx.setResponseBody("no way");
+        }
         return null;
     }
-
 }

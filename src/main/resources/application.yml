@@ -5,11 +5,11 @@ server:
 zuul:
   sensitiveHeaders: Cookie,Set-Cookie
   routes:
-    hello:
-      path: /hello/**
+    customerservice:
+      path: /api/customer/**
       stripPrefix: false
-      url: http://localhost:8899
-    loan-service:
+      url: http://localhost:8081
+    loanservice:
       path: /api/loan/**
       stripPrefix: false
       url: http://localhost:8082

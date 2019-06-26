@@ -25,7 +25,7 @@ public class PostFilter extends ZuulFilter {
 
     @Override
     public Object run() {
-        log.info("Inside Response Filter");
+        log.info("Inside Post Filter");
 
         return null;
     }
