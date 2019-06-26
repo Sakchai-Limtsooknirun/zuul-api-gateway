@@ -2,28 +2,32 @@ server:
   port: 9999
 
 
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:8888/eureka/
-
 zuul:
-  ignoredServices: '*'
+  sensitiveHeaders: Cookie,Set-Cookie
   routes:
-      product-service:
-        path: /products/**
-        stripPrefix: false
-      loanservice:
-        path: /loan/**
-        stripPrefix: false
+#      product-service:
+#        path: /products/**
+#
+#        stripPrefix: false
+#      loanservice:
+#        path: /api/loan/**
+#        url: http://localhost:8082
+#        stripPrefix: false
+#      customerservices:
+#        path: /api/customer/**
+#        url: http://localhost:8081
+#        stripPrefix: false
 
 
-
-
+spring:
+  application:
+    name: zuul-service
 
 management:
   endpoints:
     web:
       exposure:
           include: routes,filters
+
+
 
