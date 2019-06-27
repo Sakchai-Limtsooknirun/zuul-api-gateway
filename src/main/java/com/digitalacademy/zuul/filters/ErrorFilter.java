@@ -7,13 +7,9 @@ import com.netflix.zuul.context.RequestContext;
 import com.netflix.zuul.exception.ZuulException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.springframework.stereotype.Component;
 
+import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.*;
 
-import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.ERROR_TYPE;
-import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.SEND_ERROR_FILTER_ORDER;
-
-@Component
 public class ErrorFilter extends ZuulFilter {
     private static final Logger log = LogManager.getLogger(ErrorFilter.class.getName());
 
@@ -42,8 +38,8 @@ public class ErrorFilter extends ZuulFilter {
         ctx.remove("throwable");
 
         ResponseModel responseModel = new ResponseModel();
-        responseModel.setCode(StatusResponse.GET_TECHNICAL_ERROR_EXCEPTION.getCode());
-        responseModel.setMessage(StatusResponse.GET_TECHNICAL_ERROR_EXCEPTION.getMessage());
+        responseModel.setCode(StatusResponse.GET_INTERNAL_SERVER_ERROR_EXCEPTION.getCode());
+        responseModel.setMessage(StatusResponse.GET_INTERNAL_SERVER_ERROR_EXCEPTION.getMessage());
 
         ctx.setResponseBody(responseModel.toString());
         ctx.setResponseStatusCode(500);

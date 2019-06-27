@@ -1,6 +1,5 @@
 package com.digitalacademy.zuul.response;
 
-import com.digitalacademy.zuul.constants.StatusResponse;
 import lombok.Data;
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -15,22 +14,22 @@ public class ResponseModel implements Serializable {
 
     @Override
     public String toString() {
-        JSONObject jsonObj = new JSONObject();
+
+        JSONObject data = new JSONObject();
         try {
-            JSONObject data = new JSONObject();
-//            data.put("data1","test1");
-//            data.put("data2","test2");
-
-
-            jsonObj.put("code", code);
-            jsonObj.put("message", message);
-//            jsonObj.put("data", data);
-
+            data.put("code", code);
+            data.put("message", message);
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        JSONObject status = new JSONObject();
+        try {
+            status.put("status", data);
         } catch (JSONException e) {
             e.printStackTrace();
         }
 
-        return jsonObj.toString();
+        return status.toString();
 
     }
 

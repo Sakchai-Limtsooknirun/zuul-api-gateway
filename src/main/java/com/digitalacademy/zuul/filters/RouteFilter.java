@@ -1,8 +1,13 @@
 package com.digitalacademy.zuul.filters;
 
 import com.netflix.zuul.ZuulFilter;
+import com.netflix.zuul.context.RequestContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
+import javax.servlet.http.HttpServletRequest;
+
+import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.*;
 
 public class RouteFilter extends ZuulFilter {
 
@@ -10,7 +15,7 @@ public class RouteFilter extends ZuulFilter {
 
     @Override
     public String filterType() {
-        return "route";
+        return ROUTE_TYPE;
     }
 
     @Override
@@ -26,6 +31,10 @@ public class RouteFilter extends ZuulFilter {
     @Override
     public Object run() {
         log.info("Inside Route Filter");
+        RequestContext ctx = RequestContext.getCurrentContext();
+        log.info(ctx);
+        HttpServletRequest request = ctx.getRequest();
+        log.info(request);
 
         return null;
     }

@@ -22,7 +22,7 @@ public class ZuulApplication {
 	}
 
 	@Bean
-	public PostFilter postFilter() {
+	public PostFilter post() {
 		return new PostFilter();
 	}
 
