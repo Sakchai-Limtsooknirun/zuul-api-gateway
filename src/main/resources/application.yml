@@ -13,6 +13,9 @@ zuul:
       path: /api/loan/**
       stripPrefix: false
       url: http://localhost:8082
+    mockservice:
+      path: /mock/**
+      url: http://localhost:9000/
 
 
 spring:
