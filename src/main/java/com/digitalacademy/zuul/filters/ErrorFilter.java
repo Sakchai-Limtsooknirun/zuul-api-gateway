@@ -16,6 +16,7 @@ import static org.springframework.cloud.netflix.zuul.filters.support.FilterConst
 @Component
 public class ErrorFilter extends ZuulFilter {
     private static final Logger log = LogManager.getLogger(ErrorFilter.class.getName());
+
     @Override
     public String filterType() {
         return ERROR_TYPE;
@@ -36,21 +37,18 @@ public class ErrorFilter extends ZuulFilter {
     public Object run() {
         log.info("Inside Error Filter");
         RequestContext ctx = RequestContext.getCurrentContext();
-        final Throwable throwable = ctx.getThrowable();
-        if (throwable instanceof ZuulException) {
-            log.error("Zuul failure detected: " + throwable.getMessage(), throwable);
+        log.error("Zuul failure detected with error code: " + ctx.getResponseStatusCode());
 
-            ctx.remove("throwable");
+        ctx.remove("throwable");
 
+        ResponseModel responseModel = new ResponseModel();
+        responseModel.setCode(StatusResponse.GET_TECHNICAL_ERROR_EXCEPTION.getCode());
+        responseModel.setMessage(StatusResponse.GET_TECHNICAL_ERROR_EXCEPTION.getMessage());
 
-            ResponseModel responseModel = new ResponseModel();
-            responseModel.setCode(StatusResponse.GET_TECHNICAL_ERROR_EXCEPTION.getCode());
-            responseModel.setMessage(StatusResponse.GET_TECHNICAL_ERROR_EXCEPTION.getMessage());
-            ctx.setResponseBody(responseModel.toString());
-            ctx.setResponseStatusCode(500);
-            ctx.getResponse().setContentType("application/json");
+        ctx.setResponseBody(responseModel.toString());
+        ctx.setResponseStatusCode(500);
+        ctx.getResponse().setContentType("application/json");
 
-        }
         return null;
     }
 }
