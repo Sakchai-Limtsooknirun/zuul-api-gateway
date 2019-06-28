@@ -35,6 +35,7 @@ public class ErrorFilter extends ZuulFilter {
         RequestContext ctx = RequestContext.getCurrentContext();
         log.error("Zuul failure detected with error code: " + ctx.getResponseStatusCode());
 
+        log.info(ctx.getRequest().getRequestURI());
         ctx.remove("throwable");
 
         ResponseModel responseModel = new ResponseModel();

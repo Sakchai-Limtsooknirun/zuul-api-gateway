@@ -84,7 +84,6 @@
                 <configuration>
                     <destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>
                     <dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>
-                    <!--                        					ตัด floder ที่ไม่ต้องการ เทส-->
                     <excludes>
                         <exclude>com/digitalacademy/customerservices/model/*</exclude>
                         <exclude>com/digitalacademy/customerservices/repositoies/*</exclude>
