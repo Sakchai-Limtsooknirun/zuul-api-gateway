@@ -52,13 +52,13 @@ public class ErrorFilterTest {
 
     @DisplayName("Test filter Type must return filter type is error")
     @Test
-    public void TestfilterTypeisERROR_TYPE() {
+    public void TestFilterTypeisERROR_TYPE() {
         assertEquals(FilterConstants.ERROR_TYPE, errorFilter.filterType());
     }
 
     @DisplayName("Test filter order must return order is equal 0")
     @Test
-    public void TestfilterOrderisErrorOrder() {
+    public void TestFilterOrderIsErrorOrder() {
         assertEquals(0, errorFilter.filterOrder());
     }
 
@@ -71,6 +71,7 @@ public class ErrorFilterTest {
 
         assertEquals(exception, RequestContext.getCurrentContext().getThrowable());
         assertTrue(errorFilter.shouldFilter());
+        verify(context,times(2)).getCurrentContext().getThrowable();
     }
 
     @DisplayName("Test context throwable has empty shouldFilterTest() must return false")
@@ -82,6 +83,7 @@ public class ErrorFilterTest {
 
         assertEquals(null, RequestContext.getCurrentContext().getThrowable());
         assertFalse(errorFilter.shouldFilter());
+        verify(context,times(2)).getCurrentContext().getThrowable();
     }
 
     @DisplayName("Test Handle Response Error in context response")
@@ -95,6 +97,7 @@ public class ErrorFilterTest {
         assertTrue(responseModel.toString().equals(context.getResponseBody()));
         RequestContext.testSetCurrentContext(context);
         errorFilter.run();
+        verify(context,times(1)).setResponseBody(responseModel.toString());
 
     }
 
