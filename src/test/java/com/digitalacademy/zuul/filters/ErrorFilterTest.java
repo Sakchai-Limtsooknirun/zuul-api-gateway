@@ -16,6 +16,7 @@ import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.netflix.zuul.filters.support.FilterConstants;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -32,11 +33,11 @@ public class ErrorFilterTest {
     @InjectMocks
     private ErrorFilter errorFilter;
     @Mock
-    ZuulException exception ;
+    ZuulException exception;
     @Mock
-    RequestContext context ;
+    RequestContext context;
     @Mock
-    HttpServletRequest request ;
+    HttpServletRequest request;
     @Mock
     HttpServletResponse response;
 
@@ -68,7 +69,7 @@ public class ErrorFilterTest {
         RequestContext.testSetCurrentContext(context);
         when(RequestContext.getCurrentContext().getThrowable()).thenReturn(exception);
 
-        assertEquals(exception,RequestContext.getCurrentContext().getThrowable());
+        assertEquals(exception, RequestContext.getCurrentContext().getThrowable());
         assertTrue(errorFilter.shouldFilter());
     }
 
@@ -79,7 +80,7 @@ public class ErrorFilterTest {
         RequestContext.testSetCurrentContext(context);
         when(RequestContext.getCurrentContext().getThrowable()).thenReturn(null);
 
-        assertEquals(null,RequestContext.getCurrentContext().getThrowable());
+        assertEquals(null, RequestContext.getCurrentContext().getThrowable());
         assertFalse(errorFilter.shouldFilter());
     }
 

@@ -23,7 +23,7 @@ zuul:
       url: http://13.251.220.186:8081
     mockservice:
       path: /mock/**
-      url: http://localhost:9000/
+      url: http://192.168.108.132:9000
 
 test:
   ribbon:
