@@ -43,6 +43,7 @@ public class ErrorFilter extends ZuulFilter {
         responseModel.setMessage(StatusResponse.GET_INTERNAL_SERVER_ERROR_EXCEPTION.getMessage());
 
         ctx.setResponseBody(responseModel.toString());
+        log.info(ctx.getResponseBody());
         ctx.setResponseStatusCode(500);
         ctx.getResponse().setContentType("application/json");
 
