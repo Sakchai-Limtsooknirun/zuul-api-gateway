@@ -5,8 +5,11 @@ import com.digitalacademy.zuul.response.ResponseModel;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import com.netflix.zuul.exception.ZuulException;
+import org.apache.commons.httpclient.HttpClientError;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.client.HttpClientErrorException;
 
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.*;
 
@@ -44,7 +47,7 @@ public class ErrorFilter extends ZuulFilter {
 
         ctx.setResponseBody(responseModel.toString());
         log.info(ctx.getResponseBody());
-        ctx.setResponseStatusCode(500);
+        ctx.setResponseStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
         ctx.getResponse().setContentType("application/json");
 
         return null;
