@@ -8,20 +8,27 @@ zuul:
     max-per-route-connections: 10000
     max-total-connections: 5000
     socket-timeout-millis: 60000
-    semaphore:
-      max-semaphores: 500
+
+#    LIMIT REQUEST 1TIME/SEC
+  ratelimit:
+    enabled: true
+    behind-proxy: true
+    add-response-headers: true
+    default-policy-list:       #optional - will apply unless specific policy exists
+      - limit: 1               #optional - request number limit per refresh interval window
+        refresh-interval: 2    #default value (in seconds)
+        quota: 10              #optional - request time limit per refresh interval window (in seconds)
+#         /////////////
 
   sensitiveHeaders: Cookie,Set-Cookie
   routes:
     customerservice:
 #      example
-      path: /api/customer/**
-      stripPrefix: false
-      url: http://localhost:8081
+      path: /customer/**
+      url: http://localhost:8081/api/customer
     loanservice:
       path: /api/loan/**
-      stripPrefix: false
-      url: http://localhost:8082
+      url: http://localhost:8082/api/loan
 #        /////
     userservice:
       path: /user/**
@@ -36,30 +43,9 @@ zuul:
       path: /kpi/**
       url: http://localhost:8081/api/kpi
 ribbon:
-  ReadTimeout: 60000
-  connection-timeout: 3000
+  ReadTimeout: 5000
+  ConnectTimeout: 5000
 
-hystrix:
-  command:
-    default:
-      execution:
-        isolation:
-          thread:
-            timeoutInMilliseconds: 30000
-
-#ratelimit:
-#  enabled: true
-#  policy-list:
-#    loanservice:
-#      - limit: 5
-#        refresh-interval: 60
-#        type:
-#          - origin
-#    customerservice:
-#      - limit: 1
-#        refresh-interval: 2
-#        type:
-#          - origin
 
 spring:
   application:

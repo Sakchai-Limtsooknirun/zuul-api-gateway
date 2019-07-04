@@ -90,6 +90,11 @@
             <artifactId>mockito-core</artifactId>
             <version>1.10.19</version>
         </dependency>
+        <dependency>
+            <groupId>com.netflix.ribbon</groupId>
+            <artifactId>ribbon</artifactId>
+            <version>2.2.2</version>
+        </dependency>
 
     </dependencies>
 
@@ -115,11 +120,9 @@
                     <destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>
                     <dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>
                     <excludes>
-<!--                        <exclude>com/digitalacademy/customerservices/model/*</exclude>-->
-<!--                        <exclude>com/digitalacademy/customerservices/repositoies/*</exclude>-->
-<!--                        <exclude>com/digitalacademy/customerservices/model/response/*</exclude>-->
-<!--                        <exclude>com/digitalacademy/customerservices/Application*</exclude>-->
-<!--                        <exclude>com/digitalacademy/customerservices/util/*</exclude>-->
+                        <exclude>com/digitalacademy/zuul/response/*</exclude>
+                        <exclude>com/digitalacademy/zuul/constants/*</exclude>
+                        <exclude>com/digitalacademy/zuul/ZuulApplication*</exclude>
                     </excludes>
                 </configuration>
                 <executions>

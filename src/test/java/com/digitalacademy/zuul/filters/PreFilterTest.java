@@ -1,15 +1,16 @@
 package com.digitalacademy.zuul.filters;
 
 import com.netflix.zuul.context.RequestContext;
-import com.netflix.zuul.exception.ZuulException;
-import com.netflix.zuul.monitoring.MonitoringHelper;
 import org.junit.Before;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.MockitoAnnotations;
+import org.mockito.Mock;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.netflix.zuul.filters.support.FilterConstants;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.servlet.http.HttpServletRequest;
@@ -20,17 +21,31 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.*;
 
+
+@RunWith(PowerMockRunner.class)
 @ExtendWith(SpringExtension.class)
+@PrepareForTest(RequestContext.class)
 @SpringBootTest
-class PreFilterTest  {
+public class PreFilterTest  {
 
     @InjectMocks
     private PreFilter preFilter;
+    @Mock
+    HttpServletRequest request;
+    @Mock
+    HttpServletResponse response;
+    @Mock
+    RequestContext context;
 
     @Before
-    public void setup() {
-        MockitoAnnotations.initMocks(this);
-        MonitoringHelper.initMocks();
+    public void setUp() {
+        this.preFilter = new PreFilter();
+
+        PowerMockito.mockStatic(RequestContext.class);
+        when(RequestContext.getCurrentContext()).thenReturn(context);
+        when(request.getMethod()).thenReturn("GET");
+        when(context.getRequest()).thenReturn(request);
+
     }
 
     @Test
@@ -44,34 +59,13 @@ class PreFilterTest  {
     }
 
     @Test
-    public void shouldFilter() {
-        RequestContext context = mock(RequestContext.class);
-        HttpServletRequest request = mock(HttpServletRequest.class);
-
-        when(context.getRequest()).thenReturn(request);
-        when(request.getRequestURL()).thenReturn(new StringBuffer("http://localhost:99999"));
-        //when(request.getRequestURL().toString()).thenReturn(new StringBuffer("http://localhost:99999").toString());
-
-
-
-        assertEquals(true, preFilter.shouldFilter());
-
+    public void TestShouldFilterReturnTrue() {
+        assertTrue(preFilter.shouldFilter());
     }
-
-
 
     @Test
     public void testRun() {
 
-//        RequestContext context = mock(RequestContext.class);
-//        HttpServletRequest request = mock(HttpServletRequest.class);
-//        HttpServletResponse response = mock(HttpServletResponse.class);
-//        when(request.getMethod()).thenReturn("GET");
-//        when(context.getRequest()).thenReturn(request);
-//        when(context.getResponse()).thenReturn(response);
-//
-//        RequestContext.testSetCurrentContext(context);
-//        preFilter.run();
     }
 
 }

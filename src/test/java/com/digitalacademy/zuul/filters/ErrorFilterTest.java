@@ -15,6 +15,7 @@ import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.netflix.zuul.filters.support.FilterConstants;
+import org.springframework.http.HttpStatus;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.servlet.http.HttpServletRequest;
@@ -86,14 +87,32 @@ public class ErrorFilterTest {
         verify(context,times(2)).getCurrentContext().getThrowable();
     }
 
-    @DisplayName("Test Handle Response Error in context response")
+    @DisplayName("Test Handle Response with Internal Server Error in context response")
     @Test
-    public void TestRun() {
+    public void TestRunInternalServerError() {
         ResponseModel responseModel = new ResponseModel();
         responseModel.setCode(StatusResponse.GET_INTERNAL_SERVER_ERROR_EXCEPTION.getCode());
         responseModel.setMessage(StatusResponse.GET_INTERNAL_SERVER_ERROR_EXCEPTION.getMessage());
-
+        when(context.getResponse().getStatus()).thenReturn(HttpStatus.INTERNAL_SERVER_ERROR.value());
         when(context.getResponseBody()).thenReturn(responseModel.toString());
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR.value(),context.getResponse().getStatus());
+        assertTrue(responseModel.toString().equals(context.getResponseBody()));
+        RequestContext.testSetCurrentContext(context);
+        errorFilter.run();
+        verify(context,times(1)).setResponseBody(responseModel.toString());
+
+    }
+
+    @DisplayName("Test Handle Response Too Many Request Error in context response")
+    @Test
+    public void TestRunTooManyRequestError() {
+        ResponseModel responseModel = new ResponseModel();
+        responseModel.setCode(StatusResponse.GET_TOO_MANY_REQUEST.getCode());
+        responseModel.setMessage(StatusResponse.GET_TOO_MANY_REQUEST.getMessage());
+
+        when(context.getResponse().getStatus()).thenReturn(HttpStatus.TOO_MANY_REQUESTS.value());
+        when(context.getResponseBody()).thenReturn(responseModel.toString());
+        assertEquals(HttpStatus.TOO_MANY_REQUESTS.value(),context.getResponse().getStatus());
         assertTrue(responseModel.toString().equals(context.getResponseBody()));
         RequestContext.testSetCurrentContext(context);
         errorFilter.run();
