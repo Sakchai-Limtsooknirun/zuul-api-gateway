@@ -15,8 +15,8 @@ zuul:
     behind-proxy: true
     add-response-headers: true
     default-policy-list:       #optional - will apply unless specific policy exists
-      - limit: 1               #optional - request number limit per refresh interval window
-        refresh-interval: 2    #default value (in seconds)
+      - limit: 10               #optional - request number limit per refresh interval window
+        refresh-interval: 60    #default value (in seconds)
         quota: 10              #optional - request time limit per refresh interval window (in seconds)
 #         /////////////
 

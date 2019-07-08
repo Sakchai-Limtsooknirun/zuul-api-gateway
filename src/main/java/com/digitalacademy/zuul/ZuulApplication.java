@@ -3,8 +3,6 @@ package com.digitalacademy.zuul;
 import com.digitalacademy.zuul.filters.ErrorFilter;
 import com.digitalacademy.zuul.filters.PostFilter;
 import com.digitalacademy.zuul.filters.PreFilter;
-import com.marcosbarbero.cloud.autoconfigure.zuul.ratelimit.config.repository.DefaultRateLimiterErrorHandler;
-import com.marcosbarbero.cloud.autoconfigure.zuul.ratelimit.config.repository.RateLimiterErrorHandler;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;

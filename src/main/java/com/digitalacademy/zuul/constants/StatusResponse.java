@@ -1,6 +1,5 @@
 package com.digitalacademy.zuul.constants;
 
-import com.netflix.ribbon.proxy.annotation.Http;
 import lombok.Getter;
 import org.springframework.http.HttpStatus;
 

@@ -7,17 +7,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.*;
 
@@ -33,15 +30,11 @@ public class PreFilterTest  {
     @Mock
     HttpServletRequest request;
     @Mock
-    HttpServletResponse response;
-    @Mock
     RequestContext context;
 
     @Before
     public void setUp() {
         this.preFilter = new PreFilter();
-
-        PowerMockito.mockStatic(RequestContext.class);
         when(RequestContext.getCurrentContext()).thenReturn(context);
         when(request.getMethod()).thenReturn("GET");
         when(context.getRequest()).thenReturn(request);
@@ -65,7 +58,9 @@ public class PreFilterTest  {
 
     @Test
     public void testRun() {
-
+        String testUrl = "localhost:9999/test" ;
+        when(request.getRequestURL()).thenReturn(new StringBuffer(testUrl));
+        assertEquals(new StringBuffer(testUrl).toString(),request.getRequestURL().toString());
     }
 
 }

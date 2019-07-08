@@ -11,6 +11,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,7 +25,7 @@ import javax.servlet.http.HttpServletResponse;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.*;
 
-
+@PowerMockIgnore("javax.management.*")
 @RunWith(PowerMockRunner.class)
 @ExtendWith(SpringExtension.class)
 @PrepareForTest(RequestContext.class)
