@@ -3,31 +3,49 @@ server:
 
 
 zuul:
+  host:
+    connect-timeout-millis: 5000
+    max-per-route-connections: 10000
+    max-total-connections: 5000
+    socket-timeout-millis: 60000
+
+#    LIMIT REQUEST 1TIME/SEC
+  ratelimit:
+    enabled: true
+    behind-proxy: true
+    add-response-headers: true
+    default-policy-list:       #optional - will apply unless specific policy exists
+      - limit: 10               #optional - request number limit per refresh interval window
+        refresh-interval: 60    #default value (in seconds)
+        quota: 10              #optional - request time limit per refresh interval window (in seconds)
+#         /////////////
+
   sensitiveHeaders: Cookie,Set-Cookie
   routes:
     customerservice:
-      path: /api/customer/**
-      stripPrefix: false
-      url: http://localhost:8081
+#      example
+      path: /customer/**
+      url: http://localhost:8081/api/customer
     loanservice:
       path: /api/loan/**
-      stripPrefix: false
-      url: http://localhost:8082
-    hello:
-      path: /hello/**
-      stripPrefix: false
-      serviceId: test
+      url: http://localhost:8082/api/loan
+#        /////
     userservice:
-      path: /api/user/**
-      stripPrefix: false
-      url: http://13.251.220.186:8081
-    mockservice:
-      path: /mock/**
-      url: http://192.168.108.132:9000
+      path: /user/**
+      url: http://192.168.109.211:8089/api/user
+    examservice:
+      path: /exam/**
+      url: http://192.168.109.167:8085/api/exam
+    authservice:
+      path: /auth/**
+      url: http://192.168.109.204:8083/api/auth
+    kpiservice:
+      path: /kpi/**
+      url: http://localhost:8081/api/kpi
+ribbon:
+  ReadTimeout: 5000
+  ConnectTimeout: 5000
 
-test:
-  ribbon:
-    listOfServers: http://localhost:8899
 
 spring:
   application:

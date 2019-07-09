@@ -1,8 +1,10 @@
 package com.digitalacademy.zuul.filters;
 
 import com.netflix.zuul.ZuulFilter;
+import com.netflix.zuul.context.RequestContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 
 public class PostFilter extends ZuulFilter {
 
@@ -25,7 +27,9 @@ public class PostFilter extends ZuulFilter {
 
     @Override
     public Object run() {
-        log.info("Inside Post Filter");
+        log.debug("Inside Post Filter");
+        RequestContext ctx = RequestContext.getCurrentContext();
+        log.info( "Status : "+ctx.getResponseStatusCode());
 
         return null;
     }

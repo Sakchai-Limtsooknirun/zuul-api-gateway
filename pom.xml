@@ -24,6 +24,12 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
+            <exclusions>
+            <exclusion>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-starter-logging</artifactId>
+            </exclusion>
+        </exclusions>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -32,6 +38,11 @@
         <dependency>
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-netflix-zuul</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.marcosbarbero.cloud</groupId>
+            <artifactId>spring-cloud-zuul-ratelimit</artifactId>
+            <version>2.0.4.RELEASE</version>
         </dependency>
         <dependency>
             <groupId>org.projectlombok</groupId>
@@ -85,6 +96,16 @@
             <artifactId>mockito-core</artifactId>
             <version>1.10.19</version>
         </dependency>
+        <dependency>
+            <groupId>com.netflix.ribbon</groupId>
+            <artifactId>ribbon</artifactId>
+            <version>2.2.2</version>
+        </dependency>
+            <!-- log-->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-log4j2</artifactId>
+        </dependency>
 
     </dependencies>
 
@@ -110,11 +131,9 @@
                     <destFile>${basedir}/target/coverage-reports/jacoco-unit.exec</destFile>
                     <dataFile>${basedir}/target/coverage-reports/jacoco-unit.exec</dataFile>
                     <excludes>
-                        <exclude>com/digitalacademy/customerservices/model/*</exclude>
-                        <exclude>com/digitalacademy/customerservices/repositoies/*</exclude>
-                        <exclude>com/digitalacademy/customerservices/model/response/*</exclude>
-                        <exclude>com/digitalacademy/customerservices/Application*</exclude>
-                        <exclude>com/digitalacademy/customerservices/util/*</exclude>
+                        <exclude>com/digitalacademy/zuul/response/*</exclude>
+                        <exclude>com/digitalacademy/zuul/constants/*</exclude>
+                        <exclude>com/digitalacademy/zuul/ZuulApplication*</exclude>
                     </excludes>
                 </configuration>
                 <executions>

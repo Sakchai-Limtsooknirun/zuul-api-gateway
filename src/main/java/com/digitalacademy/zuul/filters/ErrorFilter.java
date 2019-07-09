@@ -7,6 +7,7 @@ import com.netflix.zuul.context.RequestContext;
 import com.netflix.zuul.exception.ZuulException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.http.HttpStatus;
 
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.*;
 
@@ -25,26 +26,34 @@ public class ErrorFilter extends ZuulFilter {
 
     @Override
     public boolean shouldFilter() {
-        return RequestContext.getCurrentContext().getThrowable() instanceof ZuulException;
+        RequestContext context = RequestContext.getCurrentContext();
+        return context.getThrowable() instanceof ZuulException;
 
     }
 
     @Override
     public Object run() {
-        log.info("Inside Error Filter");
+        log.error("Inside Error Filter");
         RequestContext ctx = RequestContext.getCurrentContext();
         log.error("Zuul failure detected with error code: " + ctx.getResponseStatusCode());
-
-        log.info(ctx.getRequest().getRequestURI());
+        log.error(ctx.getRequest().getRequestURI());
+        ResponseModel responseModel = new ResponseModel();
         ctx.remove("throwable");
 
-        ResponseModel responseModel = new ResponseModel();
-        responseModel.setCode(StatusResponse.GET_INTERNAL_SERVER_ERROR_EXCEPTION.getCode());
-        responseModel.setMessage(StatusResponse.GET_INTERNAL_SERVER_ERROR_EXCEPTION.getMessage());
+        if (ctx.getResponse().getStatus() == HttpStatus.TOO_MANY_REQUESTS.value() ){
+            responseModel.setCode(StatusResponse.GET_TOO_MANY_REQUEST.getCode());
+            responseModel.setMessage(StatusResponse.GET_TOO_MANY_REQUEST.getMessage());
+            ctx.setResponseBody(responseModel.toString());
+            ctx.setResponseStatusCode(HttpStatus.TOO_MANY_REQUESTS.value());
+            log.info(ctx.getResponseBody());
+        }else {
+            responseModel.setCode(StatusResponse.GET_INTERNAL_SERVER_ERROR_EXCEPTION.getCode());
+            responseModel.setMessage(StatusResponse.GET_INTERNAL_SERVER_ERROR_EXCEPTION.getMessage());
+            ctx.setResponseBody(responseModel.toString());
+            ctx.setResponseStatusCode(HttpStatus.INTERNAL_SERVER_ERROR.value());
+            log.info(ctx.getResponseBody());
 
-        ctx.setResponseBody(responseModel.toString());
-        log.info(ctx.getResponseBody());
-        ctx.setResponseStatusCode(500);
+        }
         ctx.getResponse().setContentType("application/json");
 
         return null;

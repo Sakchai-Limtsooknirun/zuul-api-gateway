@@ -3,7 +3,7 @@ package com.digitalacademy.zuul;
 import com.digitalacademy.zuul.filters.ErrorFilter;
 import com.digitalacademy.zuul.filters.PostFilter;
 import com.digitalacademy.zuul.filters.PreFilter;
-import com.digitalacademy.zuul.filters.RouteFilter;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.cloud.netflix.zuul.EnableZuulProxy;
@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
 @EnableZuulProxy
+@Qualifier("RateLimit")
 public class ZuulApplication {
 
 	public static void main(String[] args) {
@@ -31,8 +32,5 @@ public class ZuulApplication {
 		return new ErrorFilter();
 	}
 
-	@Bean
-	public RouteFilter routeFilter() {
-		return new RouteFilter();
-	}
+
 }

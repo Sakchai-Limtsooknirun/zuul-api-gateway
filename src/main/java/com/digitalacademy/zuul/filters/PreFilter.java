@@ -47,7 +47,6 @@ public class PreFilter extends ZuulFilter {
         }catch (Exception e){
             System.err.println(e);
         }
-
         return null;
     }
 
