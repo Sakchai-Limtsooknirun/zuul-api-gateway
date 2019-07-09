@@ -32,6 +32,10 @@ test:
 spring:
   application:
     name: zuul-service
+  authService:
+    host: http://192.168.109.180:8083/api/auth
+    endpoint:
+      getVerify: verify
 
 management:
   endpoints:
