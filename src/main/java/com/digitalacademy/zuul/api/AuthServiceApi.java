@@ -1,7 +1,5 @@
 package com.digitalacademy.zuul.api;
 
-import com.digitalacademy.zuul.model.GetAuthResponse;
-import com.digitalacademy.zuul.utils.JsonToObjectConverter;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -36,14 +34,7 @@ public class AuthServiceApi {
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
         JSONObject resp = new JSONObject(response.getBody());
-        JSONObject status = new JSONObject(resp.getString("status"));
+        return resp.toString();
 
-        if(response.getStatusCode().value() == 200){
-//            System.out.println("auth pass");
-            data = resp.get("data").toString();
-            return data;
-        }
-        System.out.println("error auth");
-        throw new Exception();
     }
 }

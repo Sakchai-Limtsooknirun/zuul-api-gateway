@@ -32,13 +32,13 @@ zuul:
 #        /////
     userservice:
       path: /user/**
-      url: http://192.168.109.211:8089/api/user
+      url: http://192.168.43.239:8089/api/user
     examservice:
       path: /exam/**
       url: http://192.168.109.167:8085/api/exam
     authservice:
       path: /auth/**
-      url: http://192.168.109.204:8083/api/auth
+      url: http://192.168.43.114:8083/api/auth
     kpiservice:
       path: /kpi/**
       url: http://localhost:8081/api/kpi
@@ -51,7 +51,7 @@ spring:
   application:
     name: zuul-service
   authService:
-    host: http://192.168.109.180:8083/api/auth
+    host: http://192.168.43.114:8083/api/auth
     endpoint:
       getVerify: verify
 

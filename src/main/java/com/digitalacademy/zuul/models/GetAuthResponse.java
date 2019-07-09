@@ -1,9 +1,7 @@
-package com.digitalacademy.zuul.model;
+package com.digitalacademy.zuul.models;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.Data;
-
-import java.io.Serializable;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
