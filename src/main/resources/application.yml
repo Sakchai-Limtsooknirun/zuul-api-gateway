@@ -32,17 +32,18 @@ zuul:
 #        /////
     userservice:
       path: /user/**
-#      url: http://192.168.43.239:8089/api/user
-      url: http://localhost:1001/api/user
+      url: http://192.168.110.5:8089/api/user
+#      url: http://localhost:1001/api/user
     examservice:
       path: /exam/**
       url: http://192.168.109.167:8085/api/exam
     authservice:
       path: /auth/**
-      url: http://192.168.43.114:8083/api/auth
+      url: http://192.168.109.190:8083/api/auth
     kpiservice:
       path: /kpi/**
       url: http://localhost:8081/api/kpi
+
 ribbon:
   ReadTimeout: 5000
   ConnectTimeout: 5000
@@ -53,7 +54,8 @@ spring:
     name: zuul-service
   authService:
 #    host: http://192.168.43.114:8083/api/auth
-    host: http://localhost:9977/api/auth
+    host: http://192.168.109.190:8083/api/auth
+#    host: http://localhost:9977/api/auth
     endpoint:
       getVerify: verify
 

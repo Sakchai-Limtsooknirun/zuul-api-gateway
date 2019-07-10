@@ -1,7 +1,9 @@
 package com.digitalacademy.zuul.filters;
 
 import com.digitalacademy.zuul.api.AuthServiceApi;
+import com.digitalacademy.zuul.constants.StatusResponse;
 import com.digitalacademy.zuul.models.Response;
+import com.digitalacademy.zuul.response.ResponseModel;
 import com.digitalacademy.zuul.utils.JsonToObjectConverter;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
@@ -19,6 +21,7 @@ import javax.servlet.http.HttpServletRequest;
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.PRE_TYPE;
 
 public class PreFilter extends ZuulFilter {
+
     @Autowired
     private AuthServiceApi authServiceApi;
 
@@ -51,32 +54,39 @@ public class PreFilter extends ZuulFilter {
         try {
             if (StringUtils.isEmpty(token)) {
                 log.info("No Token");
-                ZuulException zuulException = new ZuulException("token not found", HttpStatus.UNAUTHORIZED.value(), HttpStatus.UNAUTHORIZED.getReasonPhrase());
+                ZuulException zuulException = new ZuulException("token not found",
+                        HttpStatus.UNAUTHORIZED.value(),
+                        HttpStatus.UNAUTHORIZED.getReasonPhrase());
                 ctx.setThrowable(zuulException);
                 throw zuulException;
             } else {
                 ResponseEntity response = this.authServiceApi.verifyUser(token);
                 JSONObject data = new JSONObject(response.getBody().toString());
                 Response dataObj = JsonToObjectConverter.readValue(data.toString(), Response.class);
-                log.info(dataObj != null);
-                log.info(dataObj.getStatus().getCode());
-                if (dataObj.getStatus().getCode() == 1000) {
-                    System.out.println("correct");
-                    ctx.addZuulRequestHeader("accessToken", null);
-                    ctx.addZuulRequestHeader("id", dataObj.getData().getUser_id().toString());
-                    ctx.addZuulRequestHeader("Content-Type", "application/json");
-                    log.info("user id : " + dataObj.getData().getUser_id().toString());
-                } else {
-                    System.out.println("Incorrect");
-                    System.out.println(dataObj.getStatus().toString());
-                    ctx.setResponseBody(dataObj.getStatus().toString());
-                }
-
+                ctx.addZuulRequestHeader("accessToken", null);
+                ctx.addZuulRequestHeader("id", dataObj.getData().getUser_id().toString());
+                ctx.addZuulRequestHeader("Content-Type", "application/json");
+                log.info("user id : " + dataObj.getData().getUser_id().toString());
             }
-        } catch (ZuulException e) {
-            System.err.println("Entered ZuulException" + e.getMessage());
         } catch (Exception e) {
-            System.err.println("Entered Exception" + e.getMessage());
+            ResponseModel responseModel = new ResponseModel();
+            int errorCode = Integer.parseInt(e.getMessage().split(" ")[0]);
+            log.error("Entered Exception with error code: " + errorCode);
+            ctx.setSendZuulResponse(false);
+            ctx.getResponse().setHeader("Content-Type", "application/json");
+
+            if (errorCode == HttpStatus.FORBIDDEN.value()) {
+                ctx.setResponseStatusCode(HttpStatus.FORBIDDEN.value());
+                responseModel.setCode(StatusResponse.GET_EXPIRED_ERROR_EXCEPTION.getCode());
+                responseModel.setMessage(StatusResponse.GET_EXPIRED_ERROR_EXCEPTION.getMessage());
+                ctx.setResponseBody(responseModel.toString());
+
+            } else if (errorCode == HttpStatus.NOT_FOUND.value()) {
+                ctx.setResponseStatusCode(HttpStatus.NOT_FOUND.value());
+                responseModel.setCode(StatusResponse.GET_NOT_FOUND_ERROR_EXCEPTION.getCode());
+                responseModel.setMessage(StatusResponse.GET_NOT_FOUND_ERROR_EXCEPTION.getMessage());
+                ctx.setResponseBody(responseModel.toString());
+            }
         }
         return null;
     }

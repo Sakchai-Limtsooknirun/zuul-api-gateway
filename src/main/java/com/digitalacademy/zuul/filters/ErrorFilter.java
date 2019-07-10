@@ -40,13 +40,13 @@ public class ErrorFilter extends ZuulFilter {
         ResponseModel responseModel = new ResponseModel();
         ctx.remove("throwable");
 
-        if (ctx.getResponse().getStatus() == HttpStatus.TOO_MANY_REQUESTS.value() ){
+        if (ctx.getResponse().getStatus() == HttpStatus.TOO_MANY_REQUESTS.value()) {
             responseModel.setCode(StatusResponse.GET_TOO_MANY_REQUEST.getCode());
             responseModel.setMessage(StatusResponse.GET_TOO_MANY_REQUEST.getMessage());
             ctx.setResponseBody(responseModel.toString());
             ctx.setResponseStatusCode(HttpStatus.TOO_MANY_REQUESTS.value());
             log.info(ctx.getResponseBody());
-        }else {
+        } else {
             responseModel.setCode(StatusResponse.GET_INTERNAL_SERVER_ERROR_EXCEPTION.getCode());
             responseModel.setMessage(StatusResponse.GET_INTERNAL_SERVER_ERROR_EXCEPTION.getMessage());
             ctx.setResponseBody(responseModel.toString());

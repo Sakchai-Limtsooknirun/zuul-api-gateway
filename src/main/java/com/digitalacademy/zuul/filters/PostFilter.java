@@ -27,9 +27,9 @@ public class PostFilter extends ZuulFilter {
 
     @Override
     public Object run() {
-        log.debug("Inside Post Filter");
+        log.info("Inside Post Filter");
         RequestContext ctx = RequestContext.getCurrentContext();
-        log.info( "Status : "+ctx.getResponseStatusCode());
+        log.info("Status : " + ctx.getResponseStatusCode());
 
         return null;
     }
