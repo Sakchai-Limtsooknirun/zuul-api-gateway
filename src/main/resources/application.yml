@@ -42,7 +42,7 @@ zuul:
       url: http://192.168.109.190:8083/api/auth
     kpiservice:
       path: /kpi/**
-      url: http://localhost:8081/api/kpi
+      url: http://192.168.111.189:8081/api/kpi
 
 ribbon:
   ReadTimeout: 5000
