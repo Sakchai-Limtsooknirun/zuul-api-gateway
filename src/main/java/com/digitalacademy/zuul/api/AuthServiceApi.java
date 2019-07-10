@@ -1,6 +1,5 @@
 package com.digitalacademy.zuul.api;
 
-import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.*;
@@ -22,10 +21,8 @@ public class AuthServiceApi {
         this.restTemplate = restTemplate;
     }
 
-    public String verifyUser(String token) throws Exception{
-//        System.out.println("test auth");
+    public ResponseEntity verifyUser(String token) {
         String url = host + "/" + getVerify;
-        String data;
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("accessToken", token);
@@ -33,8 +30,7 @@ public class AuthServiceApi {
 
         ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
 
-        JSONObject resp = new JSONObject(response.getBody());
-        return resp.toString();
+        return response;
 
     }
 }

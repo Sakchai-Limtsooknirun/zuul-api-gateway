@@ -10,7 +10,7 @@ import java.io.Serializable;
 
 @Data
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class ResponseModel implements Serializable {
+public class Response implements Serializable {
 
     @JsonProperty("status")
     private StatusModel status;
@@ -18,14 +18,14 @@ public class ResponseModel implements Serializable {
     @JsonProperty("data")
     private GetAuthResponse data;
 
-    public ResponseModel() {
+    public Response() {
     }
 
-    public ResponseModel(StatusModel statusModel) {
+    public Response(StatusModel statusModel) {
         this.status = statusModel;
     }
 
-    public ResponseModel(StatusModel statusModel, GetAuthResponse data) {
+    public Response(StatusModel statusModel, GetAuthResponse data) {
         this.status = statusModel;
         this.data = data;
     }

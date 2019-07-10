@@ -1,15 +1,17 @@
 package com.digitalacademy.zuul.filters;
 
 import com.digitalacademy.zuul.api.AuthServiceApi;
-import com.digitalacademy.zuul.models.ResponseModel;
+import com.digitalacademy.zuul.models.Response;
 import com.digitalacademy.zuul.utils.JsonToObjectConverter;
 import com.netflix.zuul.ZuulFilter;
 import com.netflix.zuul.context.RequestContext;
 import com.netflix.zuul.exception.ZuulException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
 
 import javax.servlet.http.HttpServletRequest;
@@ -53,13 +55,14 @@ public class PreFilter extends ZuulFilter {
                 ctx.setThrowable(zuulException);
                 throw zuulException;
             } else {
-                String data = this.authServiceApi.verifyUser(token);
-                ResponseModel dataObj = JsonToObjectConverter.readValue(data, ResponseModel.class);
+                ResponseEntity response = this.authServiceApi.verifyUser(token);
+                JSONObject data = new JSONObject(response.getBody().toString());
+                Response dataObj = JsonToObjectConverter.readValue(data.toString(), Response.class);
                 log.info(dataObj != null);
                 log.info(dataObj.getStatus().getCode());
                 if (dataObj.getStatus().getCode() == 1000) {
                     System.out.println("correct");
-                    ctx.remove("accessToken");
+                    ctx.addZuulRequestHeader("accessToken", null);
                     ctx.addZuulRequestHeader("id", dataObj.getData().getUser_id().toString());
                     ctx.addZuulRequestHeader("Content-Type", "application/json");
                     log.info("user id : " + dataObj.getData().getUser_id().toString());
@@ -71,9 +74,9 @@ public class PreFilter extends ZuulFilter {
 
             }
         } catch (ZuulException e) {
-            System.out.println("Entered ZuulException" + e.getMessage());
+            System.err.println("Entered ZuulException" + e.getMessage());
         } catch (Exception e) {
-            System.out.println("Entered Exception" + e.getMessage());
+            System.err.println("Entered Exception" + e.getMessage());
         }
         return null;
     }
