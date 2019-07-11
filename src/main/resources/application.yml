@@ -9,16 +9,14 @@ zuul:
     max-total-connections: 5000
     socket-timeout-millis: 60000
 
-#    LIMIT REQUEST 1TIME/SEC
   ratelimit:
     enabled: true
     behind-proxy: true
     add-response-headers: true
-    default-policy-list:       #optional - will apply unless specific policy exists
-      - limit: 10               #optional - request number limit per refresh interval window
-        refresh-interval: 60    #default value (in seconds)
-        quota: 10              #optional - request time limit per refresh interval window (in seconds)
-#         /////////////
+    default-policy-list:
+      - limit: 20
+        refresh-interval: 60
+        quota: 10
 
   sensitiveHeaders: Cookie,Set-Cookie
   routes:
@@ -53,9 +51,7 @@ spring:
   application:
     name: zuul-service
   authService:
-#    host: http://192.168.43.114:8083/api/auth
     host: http://192.168.109.190:8083/api/auth
-#    host: http://localhost:9977/api/auth
     endpoint:
       getVerify: verify
 

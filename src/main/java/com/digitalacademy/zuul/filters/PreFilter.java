@@ -39,7 +39,9 @@ public class PreFilter extends ZuulFilter {
 
     @Override
     public boolean shouldFilter() {
-        return !RequestContext.getCurrentContext().getRequest().getRequestURI().startsWith("/auth");
+        String requestUrl = RequestContext.getCurrentContext().getRequest().getRequestURI();
+        return !requestUrl.startsWith("/auth") && !requestUrl.startsWith("/user/register") && !requestUrl.startsWith(
+                "/user/delete/account");
     }
 
     @Override
