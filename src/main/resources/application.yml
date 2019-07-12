@@ -14,24 +14,15 @@ zuul:
     behind-proxy: true
     add-response-headers: true
     default-policy-list:
-      - limit: 20
+      - limit: 10
         refresh-interval: 60
         quota: 10
 
   sensitiveHeaders: Cookie,Set-Cookie
   routes:
-    customerservice:
-#      example
-      path: /customer/**
-      url: http://localhost:8081/api/customer
-    loanservice:
-      path: /api/loan/**
-      url: http://localhost:8082/api/loan
-#        /////
     userservice:
       path: /user/**
       url: http://192.168.110.5:8089/api/user
-#      url: http://localhost:1001/api/user
     examservice:
       path: /exam/**
       url: http://192.168.109.95:8085/api/exam
@@ -40,7 +31,7 @@ zuul:
       url: http://192.168.109.190:8083/api/auth
     kpiservice:
       path: /kpi/**
-      url: http://192.168.111.189:8081/api/kpi
+      url: http://192.168.108.107:8081/api/kpi
 
 ribbon:
   ReadTimeout: 5000

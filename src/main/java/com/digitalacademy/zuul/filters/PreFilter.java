@@ -15,12 +15,20 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpClientErrorException;
 
 import javax.servlet.http.HttpServletRequest;
 
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.PRE_TYPE;
 
 public class PreFilter extends ZuulFilter {
+
+    private String createResponse(int code, String message) {
+        ResponseModel responseModel = new ResponseModel();
+        responseModel.setCode(code);
+        responseModel.setMessage(message);
+        return responseModel.toString();
+    }
 
     @Autowired
     private AuthServiceApi authServiceApi;
@@ -49,46 +57,50 @@ public class PreFilter extends ZuulFilter {
         RequestContext ctx = RequestContext.getCurrentContext();
         HttpServletRequest request = ctx.getRequest();
         log.info("Inside Pre Filter");
-        log.info("Request Method : " + request.getMethod() + ", Request URL : " + request.getRequestURL().toString());
+        log.info("Request Method: " + request.getMethod() + ", Request URL : " + request.getRequestURL().toString());
+        log.info("Client IP: " + request.getRemoteAddr());
         String token = ctx.getRequest().getHeader("accessToken");
-        log.info(token);
-
+        ctx.addZuulRequestHeader("Content-Type", "application/json");
+        ctx.getResponse().setHeader("Content-Type", "application/json");
         try {
             if (StringUtils.isEmpty(token)) {
                 log.info("No Token");
-                ZuulException zuulException = new ZuulException("token not found",
-                        HttpStatus.UNAUTHORIZED.value(),
-                        HttpStatus.UNAUTHORIZED.getReasonPhrase());
-                ctx.setThrowable(zuulException);
-                throw zuulException;
+                ctx.setSendZuulResponse(false);
+                ctx.setResponseStatusCode(HttpStatus.BAD_REQUEST.value());
+                ctx.setResponseBody(createResponse(StatusResponse.GET_HEADER_TOKEN_NOT_FOUND.getCode(),
+                        StatusResponse.GET_HEADER_TOKEN_NOT_FOUND.getMessage()));
             } else {
                 ResponseEntity response = this.authServiceApi.verifyUser(token);
                 JSONObject data = new JSONObject(response.getBody().toString());
                 Response dataObj = JsonToObjectConverter.readValue(data.toString(), Response.class);
                 ctx.addZuulRequestHeader("accessToken", null);
                 ctx.addZuulRequestHeader("id", dataObj.getData().getUser_id().toString());
-                ctx.addZuulRequestHeader("Content-Type", "application/json");
-                log.info("user id : " + dataObj.getData().getUser_id().toString());
+                log.info("user id: " + dataObj.getData().getUser_id().toString());
             }
-        } catch (Exception e) {
-            ResponseModel responseModel = new ResponseModel();
+        } catch (HttpClientErrorException e) {
             int errorCode = Integer.parseInt(e.getMessage().split(" ")[0]);
-            log.error("Entered Exception with error code: " + errorCode);
             ctx.setSendZuulResponse(false);
-            ctx.getResponse().setHeader("Content-Type", "application/json");
-
             if (errorCode == HttpStatus.FORBIDDEN.value()) {
+                log.error("Status " + errorCode + ": Expired token");
                 ctx.setResponseStatusCode(HttpStatus.FORBIDDEN.value());
-                responseModel.setCode(StatusResponse.GET_EXPIRED_ERROR_EXCEPTION.getCode());
-                responseModel.setMessage(StatusResponse.GET_EXPIRED_ERROR_EXCEPTION.getMessage());
-                ctx.setResponseBody(responseModel.toString());
+                ctx.setResponseBody(createResponse(StatusResponse.GET_EXPIRED_ERROR_EXCEPTION.getCode(),
+                        StatusResponse.GET_EXPIRED_ERROR_EXCEPTION.getMessage()));
 
             } else if (errorCode == HttpStatus.NOT_FOUND.value()) {
+                log.error("Status " + errorCode + ": Invalid token");
                 ctx.setResponseStatusCode(HttpStatus.NOT_FOUND.value());
-                responseModel.setCode(StatusResponse.GET_NOT_FOUND_ERROR_EXCEPTION.getCode());
-                responseModel.setMessage(StatusResponse.GET_NOT_FOUND_ERROR_EXCEPTION.getMessage());
-                ctx.setResponseBody(responseModel.toString());
+                ctx.setResponseBody(createResponse(StatusResponse.GET_NOT_FOUND_ERROR_EXCEPTION.getCode(),
+                        StatusResponse.GET_NOT_FOUND_ERROR_EXCEPTION.getMessage()));
             }
+        } catch (Exception e) {
+            log.error("Entered Exception with : " + e.getMessage());
+            log.error("Throw to error filter");
+            ZuulException zuulException = new ZuulException(e.getMessage(),
+                    HttpStatus.INTERNAL_SERVER_ERROR.value(),
+                    HttpStatus.INTERNAL_SERVER_ERROR.getReasonPhrase());
+            ctx.setThrowable(zuulException);
+            throw zuulException;
+
         }
         return null;
     }
