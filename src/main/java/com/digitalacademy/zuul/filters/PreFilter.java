@@ -62,6 +62,7 @@ public class PreFilter extends ZuulFilter {
         String token = ctx.getRequest().getHeader("accessToken");
         ctx.addZuulRequestHeader("Content-Type", "application/json");
         ctx.getResponse().setHeader("Content-Type", "application/json");
+
         try {
             if (StringUtils.isEmpty(token)) {
                 log.info("No Token");
@@ -69,6 +70,7 @@ public class PreFilter extends ZuulFilter {
                 ctx.setResponseStatusCode(HttpStatus.BAD_REQUEST.value());
                 ctx.setResponseBody(createResponse(StatusResponse.GET_HEADER_TOKEN_NOT_FOUND.getCode(),
                         StatusResponse.GET_HEADER_TOKEN_NOT_FOUND.getMessage()));
+
             } else {
                 ResponseEntity response = this.authServiceApi.verifyUser(token);
                 JSONObject data = new JSONObject(response.getBody().toString());
@@ -76,22 +78,22 @@ public class PreFilter extends ZuulFilter {
                 ctx.addZuulRequestHeader("accessToken", null);
                 ctx.addZuulRequestHeader("id", dataObj.getData().getUser_id().toString());
                 log.info("user id: " + dataObj.getData().getUser_id().toString());
-            }
-        } catch (HttpClientErrorException e) {
-            int errorCode = Integer.parseInt(e.getMessage().split(" ")[0]);
-            ctx.setSendZuulResponse(false);
-            if (errorCode == HttpStatus.FORBIDDEN.value()) {
-                log.error("Status " + errorCode + ": Expired token");
-                ctx.setResponseStatusCode(HttpStatus.FORBIDDEN.value());
-                ctx.setResponseBody(createResponse(StatusResponse.GET_EXPIRED_ERROR_EXCEPTION.getCode(),
-                        StatusResponse.GET_EXPIRED_ERROR_EXCEPTION.getMessage()));
 
-            } else if (errorCode == HttpStatus.NOT_FOUND.value()) {
-                log.error("Status " + errorCode + ": Invalid token");
-                ctx.setResponseStatusCode(HttpStatus.NOT_FOUND.value());
-                ctx.setResponseBody(createResponse(StatusResponse.GET_NOT_FOUND_ERROR_EXCEPTION.getCode(),
-                        StatusResponse.GET_NOT_FOUND_ERROR_EXCEPTION.getMessage()));
             }
+        } catch (HttpClientErrorException.Forbidden e) {
+            ctx.setSendZuulResponse(false);
+            log.error("Status " + HttpStatus.FORBIDDEN.value() + ": Expired token");
+            ctx.setResponseStatusCode(HttpStatus.FORBIDDEN.value());
+            ctx.setResponseBody(createResponse(StatusResponse.GET_EXPIRED_ERROR_EXCEPTION.getCode(),
+                    StatusResponse.GET_EXPIRED_ERROR_EXCEPTION.getMessage()));
+
+        } catch (HttpClientErrorException.NotFound e) {
+            ctx.setSendZuulResponse(false);
+            log.error("Status " + HttpStatus.NOT_FOUND.value() + ": Invalid token");
+            ctx.setResponseStatusCode(HttpStatus.NOT_FOUND.value());
+            ctx.setResponseBody(createResponse(StatusResponse.GET_NOT_FOUND_ERROR_EXCEPTION.getCode(),
+                    StatusResponse.GET_NOT_FOUND_ERROR_EXCEPTION.getMessage()));
+
         } catch (Exception e) {
             log.error("Entered Exception with : " + e.getMessage());
             log.error("Throw to error filter");
