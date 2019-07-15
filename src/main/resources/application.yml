@@ -22,7 +22,8 @@ zuul:
   routes:
     userservice:
       path: /user/**
-      url: http://192.168.110.5:8089/api/user
+#      url: http://192.168.110.5:8089/api/user
+      url: ec2-3-0-177-136.ap-southeast-1.compute.amazonaws.com:8089/api/user
     examservice:
       path: /exam/**
       url: http://192.168.109.95:8085/api/exam
