@@ -7,6 +7,8 @@ import org.apache.logging.log4j.Logger;
 
 import javax.servlet.http.HttpServletRequest;
 
+import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.POST_TYPE;
+
 
 public class PostFilter extends ZuulFilter {
 
@@ -14,7 +16,7 @@ public class PostFilter extends ZuulFilter {
 
     @Override
     public String filterType() {
-        return "post";
+        return POST_TYPE;
     }
 
     @Override

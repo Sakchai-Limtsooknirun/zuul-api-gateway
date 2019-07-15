@@ -8,11 +8,6 @@ import org.springframework.web.client.RestTemplate;
 @Configuration
 public class RestTemplateConfig {
 
-//    @Value("${restTemplate.connectionTimeOut}")
-//    private int connectionTimeOut;
-//
-//    @Value("${restTemplate.readTimeOut}")
-//    private int readTimeOut;
 
     @Bean
     public RestTemplate getRestTemplate(){
