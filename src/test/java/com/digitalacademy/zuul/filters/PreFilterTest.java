@@ -1,12 +1,6 @@
 package com.digitalacademy.zuul.filters;
 
 import com.digitalacademy.zuul.api.AuthServiceApi;
-import com.digitalacademy.zuul.constants.StatusResponse;
-import com.digitalacademy.zuul.models.GetAuthResponse;
-import com.digitalacademy.zuul.models.Response;
-import com.digitalacademy.zuul.models.StatusModel;
-import com.digitalacademy.zuul.response.ResponseModel;
-import com.digitalacademy.zuul.utils.JsonToObjectConverter;
 import com.netflix.zuul.context.RequestContext;
 import com.netflix.zuul.exception.ZuulException;
 import com.netflix.zuul.monitoring.CounterFactory;
@@ -21,32 +15,22 @@ import org.mockito.*;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.powermock.core.classloader.annotations.PowerMockIgnore;
 import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.cloud.netflix.zuul.metrics.EmptyCounterFactory;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.*;
-import org.springframework.mock.web.MockHttpServletRequest;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.test.web.servlet.MvcResult;
-import org.springframework.test.web.servlet.setup.MockMvcBuilders;
-import org.springframework.util.StringUtils;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import java.io.IOException;
-import java.util.List;
-
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.when;
 import static org.springframework.cloud.netflix.zuul.filters.support.FilterConstants.PRE_TYPE;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 
 @PowerMockIgnore("javax.management.*")
@@ -59,8 +43,6 @@ public class PreFilterTest {
     @InjectMocks
     private PreFilter preFilter;
     @Mock
-    ZuulException exception;
-    @Mock
     RequestContext context;
     @Mock
     HttpServletRequest request;
@@ -71,12 +53,10 @@ public class PreFilterTest {
     @Mock
     RestTemplate restTemplate;
 
-    private MockMvc mockMvc;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-//        mockMvc = MockMvcBuilders.standaloneSetup(preFilter).build();
         CounterFactory.initialize(new EmptyCounterFactory());
         when(request.getMethod()).thenReturn("GET");
         when(context.getRequest()).thenReturn(request);
@@ -145,7 +125,6 @@ public class PreFilterTest {
     public void TestRequestNoToken() throws JSONException, ZuulException {
         JSONObject mockHeader = new JSONObject();
         mockHeader.put("accessToken", null);
-
         when(request.getHeader("accessToken")).thenReturn(null);
         doNothing().when(context).addZuulRequestHeader("Content-Type", "application/json");
         doNothing().when(response).setHeader("Content-Type", "application/json");
@@ -154,22 +133,16 @@ public class PreFilterTest {
         preFilter.run();
     }
 
-    private Response mockResAuthVerify() {
-        GetAuthResponse id = new GetAuthResponse();
-        id.setUser_id(1L);
-        StatusModel status = new StatusModel();
-        status.setCode(1000);
-        status.setMessage("success");
-        Response res = new Response();
-        res.setData(id);
-        res.setStatus(status);
-
-        return res;
-    }
 
     public static ResponseEntity<String> prepareResponseEntitySuccessForVerify() {
         return ResponseEntity.ok(
                 "{\"status\":{\"code\": 1000 ,\"message\":\"success\"},\"data\":{\"user_id\":1}}"
+        );
+    }
+
+    public static ResponseEntity<String> prepareResponseEntitySuccessButStatusCodeIsNot1000() {
+        return ResponseEntity.ok(
+                "{\"status\":{\"code\":\"1050\",\"message\":\"success\"},\"data\":{\"user_id\":1}}"
         );
     }
 
@@ -189,8 +162,9 @@ public class PreFilterTest {
                 Matchers.<HttpEntity<?>>any(),
                 Matchers.<Class<String>>any()
         )).thenReturn(this.prepareResponseEntitySuccessForVerify());
-
         when(authServiceApi.verifyUser("token")).thenReturn(prepareResponseEntitySuccessForVerify());
+        ResponseEntity<String> resAuth = authServiceApi.verifyUser("token");
+        assertEquals(this.prepareResponseEntitySuccessForVerify(),resAuth);
         RequestContext.testSetCurrentContext(context);
         preFilter.run();
     }
@@ -204,40 +178,30 @@ public class PreFilterTest {
         when(request.getHeader("accessToken")).thenReturn("invalid token");
         doNothing().when(context).addZuulRequestHeader("Content-Type", "application/json");
         doNothing().when(response).setHeader("Content-Type", "application/json");
-
-//        String responseJson = "{ \"status\": { \"code\": \"1699\", \"message\": \"not found\" } }";
-
-//        ResponseModel resp = new ResponseModel();
-//        resp.setCode(StatusResponse.GET_NOT_FOUND_ERROR_EXCEPTION.getCode());
-//        resp.setMessage(StatusResponse.GET_NOT_FOUND_ERROR_EXCEPTION.getMessage());
-
         when(authServiceApi.verifyUser("invalid token")).thenThrow(HttpClientErrorException.NotFound.class);
         RequestContext.testSetCurrentContext(context);
-//        System.err.println(context.getResponseStatusCode());
-//        assertEquals(HttpStatus.NOT_FOUND.value(), context.getResponseStatusCode());
+        Exception thrown = assertThrows(HttpClientErrorException.NotFound.class,()->authServiceApi.verifyUser("invalid token"));
+        assertEquals(null,thrown.getMessage());
         preFilter.run();
     }
 
     @DisplayName("Test expired token in header throw Forbidden exception")
     @Test
     public void TestTokenExpired() throws Exception {
-
-        JSONObject mockHeader = new JSONObject();
-        mockHeader.put("accessToken", "expired token");
         when(request.getHeader("accessToken")).thenReturn("expired token");
         doNothing().when(context).addZuulRequestHeader("Content-Type", "application/json");
         doNothing().when(response).setHeader("Content-Type", "application/json");
 
         when(authServiceApi.verifyUser("expired token")).thenThrow(HttpClientErrorException.Forbidden.class);
         RequestContext.testSetCurrentContext(context);
+        Exception thrown = assertThrows(HttpClientErrorException.Forbidden.class,()->authServiceApi.verifyUser("expired token"));
+        assertEquals(null,thrown.getMessage());
         preFilter.run();
     }
 
     @DisplayName("Test Internal server error throw Exception")
     @Test (expected = Exception.class)
     public void TestServerError() throws Exception {
-
-        RequestContext.testSetCurrentContext(context);
         preFilter.run();
     }
 

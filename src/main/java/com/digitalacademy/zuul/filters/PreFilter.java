@@ -72,7 +72,6 @@ public class PreFilter extends ZuulFilter {
                         StatusResponse.GET_HEADER_TOKEN_NOT_FOUND.getMessage()));
 
             } else {
-                System.err.println("ELSEEEEEEEEEEEEEEEE");
                 ResponseEntity response = authServiceApi.verifyUser(token);
                 JSONObject data = new JSONObject(response.getBody().toString());
                 Response dataObj = JsonToObjectConverter.readValue(data.toString(), Response.class);
