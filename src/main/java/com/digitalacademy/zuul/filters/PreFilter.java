@@ -72,7 +72,7 @@ public class PreFilter extends ZuulFilter {
                         StatusResponse.GET_HEADER_TOKEN_NOT_FOUND.getMessage()));
 
             } else {
-                ResponseEntity response = this.authServiceApi.verifyUser(token);
+                ResponseEntity response = authServiceApi.verifyUser(token);
                 JSONObject data = new JSONObject(response.getBody().toString());
                 Response dataObj = JsonToObjectConverter.readValue(data.toString(), Response.class);
                 ctx.addZuulRequestHeader("accessToken", null);
@@ -95,7 +95,7 @@ public class PreFilter extends ZuulFilter {
                     StatusResponse.GET_NOT_FOUND_ERROR_EXCEPTION.getMessage()));
 
         } catch (Exception e) {
-            log.error("Entered Exception with : " + e.getMessage());
+            log.error("Entered Exception with : " + e.getClass().getName());
             log.error("Throw to error filter");
             ZuulException zuulException = new ZuulException(e.getMessage(),
                     HttpStatus.INTERNAL_SERVER_ERROR.value(),
