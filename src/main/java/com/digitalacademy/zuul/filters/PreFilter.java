@@ -59,7 +59,7 @@ public class PreFilter extends ZuulFilter {
         log.info("Inside Pre Filter");
         log.info("Request Method: " + request.getMethod() + ", Request URL : " + request.getRequestURL().toString());
         log.info("Client IP: " + request.getRemoteAddr());
-        String token = ctx.getRequest().getHeader("accessToken");
+        String token = request.getHeader("accessToken");
         ctx.addZuulRequestHeader("Content-Type", "application/json");
         ctx.getResponse().setHeader("Content-Type", "application/json");
 
@@ -72,6 +72,7 @@ public class PreFilter extends ZuulFilter {
                         StatusResponse.GET_HEADER_TOKEN_NOT_FOUND.getMessage()));
 
             } else {
+                System.err.println("ELSEEEEEEEEEEEEEEEE");
                 ResponseEntity response = authServiceApi.verifyUser(token);
                 JSONObject data = new JSONObject(response.getBody().toString());
                 Response dataObj = JsonToObjectConverter.readValue(data.toString(), Response.class);

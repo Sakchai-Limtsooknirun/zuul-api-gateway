@@ -134,6 +134,7 @@
                         <exclude>com/digitalacademy/zuul/response/*</exclude>
                         <exclude>com/digitalacademy/zuul/constants/*</exclude>
                         <exclude>com/digitalacademy/zuul/ZuulApplication*</exclude>
+                        <exclude>com/digitalacademy/zuul/filters/ErrorFilter*</exclude>
                     </excludes>
                 </configuration>
                 <executions>

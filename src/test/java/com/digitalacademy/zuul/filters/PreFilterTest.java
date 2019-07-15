@@ -1,9 +1,11 @@
 package com.digitalacademy.zuul.filters;
 
 import com.digitalacademy.zuul.api.AuthServiceApi;
+import com.digitalacademy.zuul.constants.StatusResponse;
 import com.digitalacademy.zuul.models.GetAuthResponse;
 import com.digitalacademy.zuul.models.Response;
 import com.digitalacademy.zuul.models.StatusModel;
+import com.digitalacademy.zuul.response.ResponseModel;
 import com.digitalacademy.zuul.utils.JsonToObjectConverter;
 import com.netflix.zuul.context.RequestContext;
 import com.netflix.zuul.exception.ZuulException;
@@ -29,6 +31,8 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import org.springframework.util.StringUtils;
+import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import javax.servlet.http.HttpServletRequest;
@@ -65,7 +69,7 @@ public class PreFilterTest {
     @Mock
     AuthServiceApi authServiceApi;
     @Mock
-    RestTemplate restTemplate ;
+    RestTemplate restTemplate;
 
     private MockMvc mockMvc;
 
@@ -83,12 +87,12 @@ public class PreFilterTest {
 
     @Test
     public void filterType() {
-        assertEquals(PRE_TYPE , preFilter.filterType());
+        assertEquals(PRE_TYPE, preFilter.filterType());
     }
 
     @Test
     public void filterOrder() {
-        assertEquals(1 , preFilter.filterOrder());
+        assertEquals(1, preFilter.filterOrder());
 
     }
 
@@ -98,7 +102,7 @@ public class PreFilterTest {
         RequestContext.testSetCurrentContext(context);
         String uriParam = "/test";
         when(request.getRequestURI()).thenReturn(uriParam);
-        boolean should = preFilter.shouldFilter() ;
+        boolean should = preFilter.shouldFilter();
         assertTrue(should);
 
     }
@@ -109,7 +113,7 @@ public class PreFilterTest {
         RequestContext.testSetCurrentContext(context);
         String uriParam = "/auth";
         when(request.getRequestURI()).thenReturn(uriParam);
-        boolean should = preFilter.shouldFilter() ;
+        boolean should = preFilter.shouldFilter();
         assertFalse(should);
 
     }
@@ -120,7 +124,7 @@ public class PreFilterTest {
         RequestContext.testSetCurrentContext(context);
         String uriParam = "/user/register";
         when(request.getRequestURI()).thenReturn(uriParam);
-        boolean should = preFilter.shouldFilter() ;
+        boolean should = preFilter.shouldFilter();
         assertFalse(should);
 
     }
@@ -129,9 +133,9 @@ public class PreFilterTest {
     @Test
     public void shouldFilterReturnFalseForRequestToDeleteUser() {
         RequestContext.testSetCurrentContext(context);
-        String uriParam = "/user/delete/account"   ;
+        String uriParam = "/user/delete/account";
         when(request.getRequestURI()).thenReturn(uriParam);
-        boolean should = preFilter.shouldFilter() ;
+        boolean should = preFilter.shouldFilter();
         assertFalse(should);
 
     }
@@ -140,7 +144,7 @@ public class PreFilterTest {
     @Test
     public void TestRequestNoToken() throws JSONException, ZuulException {
         JSONObject mockHeader = new JSONObject();
-        mockHeader.put("accessToken",null);
+        mockHeader.put("accessToken", null);
 
         when(request.getHeader("accessToken")).thenReturn(null);
         doNothing().when(context).addZuulRequestHeader("Content-Type", "application/json");
@@ -149,7 +153,8 @@ public class PreFilterTest {
         RequestContext.testSetCurrentContext(context);
         preFilter.run();
     }
-    private Response mockResAuthVerify(){
+
+    private Response mockResAuthVerify() {
         GetAuthResponse id = new GetAuthResponse();
         id.setUser_id(1L);
         StatusModel status = new StatusModel();
@@ -168,42 +173,72 @@ public class PreFilterTest {
         );
     }
 
-    @DisplayName("Test has Token in Header")
+    @DisplayName("Test token verify success")
     @Test
-    public void TestRequestHasToken() throws Exception {
+    public void TestTokenVerifySuccess() throws Exception {
 
-//        JSONObject mockHeader = new JSONObject();
-//        mockHeader.put("accessToken","test token");
-//
-//        when(request.getHeader("accessToken")).thenReturn(mockHeader.get("accessToken").toString());
-//        doNothing().when(context).addZuulRequestHeader("Content-Type", "application/json");
-//        doNothing().when(response).setHeader("Content-Type", "application/json");
+        JSONObject mockHeader = new JSONObject();
+        mockHeader.put("accessToken", "token");
+        when(request.getHeader("accessToken")).thenReturn("token");
+        doNothing().when(context).addZuulRequestHeader("Content-Type", "application/json");
+        doNothing().when(response).setHeader("Content-Type", "application/json");
 
+        Mockito.when(restTemplate.exchange(
+                Matchers.anyString(),
+                Matchers.any(HttpMethod.class),
+                Matchers.<HttpEntity<?>>any(),
+                Matchers.<Class<String>>any()
+        )).thenReturn(this.prepareResponseEntitySuccessForVerify());
 
-//        String accessToken = "Bearer accessToken" ;
-////        when(authServiceApi.verifyUser(accessToken)).thenReturn(this.prepareResponseEntitySuccessForVerify());
-//
-////
-////        MvcResult mvcResult = mockMvc.perform(get("/auth/verify"))
-////                .andExpect(status().isOk())
-////                .andReturn();
-////
-////        when(restTemplate.postForEntity(Mockito.ArgumentMatchers.<String>(),
-////                ArgumentMatcher.<HttpEntity<String>>any(),ArgumentMatcher.<Class<String>>any
-////        )).thenReturn(prepareResponseEntitySuccessForVerify());
-////
-//        IdModel response = userApi.verifyUser(userModel);
-//        Mockito.when(restTemplate.exchange(
-//                Matchers.anyString(),
-//                Matchers.any(HttpMethod.class),
-//                Matchers.<HttpEntity<?>> any(),
-//                Matchers.<Class<String>> any()
-//        )).thenReturn(this.prepareResponseEntitySuccessForVerify());
-
-//
-////        JSONObject data = new JSONObject(body);
-////        assertEquals(mockHeader.get("accessToken").toString() ,request.getHeader("accessToken"));
+        when(authServiceApi.verifyUser("token")).thenReturn(prepareResponseEntitySuccessForVerify());
         RequestContext.testSetCurrentContext(context);
         preFilter.run();
     }
+
+    @DisplayName("Test wrong token in header throw NotFound exception")
+    @Test
+    public void TestTokenNotFound() throws Exception {
+
+        JSONObject mockHeader = new JSONObject();
+        mockHeader.put("accessToken", "invalid token");
+        when(request.getHeader("accessToken")).thenReturn("invalid token");
+        doNothing().when(context).addZuulRequestHeader("Content-Type", "application/json");
+        doNothing().when(response).setHeader("Content-Type", "application/json");
+
+//        String responseJson = "{ \"status\": { \"code\": \"1699\", \"message\": \"not found\" } }";
+
+//        ResponseModel resp = new ResponseModel();
+//        resp.setCode(StatusResponse.GET_NOT_FOUND_ERROR_EXCEPTION.getCode());
+//        resp.setMessage(StatusResponse.GET_NOT_FOUND_ERROR_EXCEPTION.getMessage());
+
+        when(authServiceApi.verifyUser("invalid token")).thenThrow(HttpClientErrorException.NotFound.class);
+        RequestContext.testSetCurrentContext(context);
+//        System.err.println(context.getResponseStatusCode());
+//        assertEquals(HttpStatus.NOT_FOUND.value(), context.getResponseStatusCode());
+        preFilter.run();
+    }
+
+    @DisplayName("Test expired token in header throw Forbidden exception")
+    @Test
+    public void TestTokenExpired() throws Exception {
+
+        JSONObject mockHeader = new JSONObject();
+        mockHeader.put("accessToken", "expired token");
+        when(request.getHeader("accessToken")).thenReturn("expired token");
+        doNothing().when(context).addZuulRequestHeader("Content-Type", "application/json");
+        doNothing().when(response).setHeader("Content-Type", "application/json");
+
+        when(authServiceApi.verifyUser("expired token")).thenThrow(HttpClientErrorException.Forbidden.class);
+        RequestContext.testSetCurrentContext(context);
+        preFilter.run();
+    }
+
+    @DisplayName("Test Internal server error throw Exception")
+    @Test (expected = Exception.class)
+    public void TestServerError() throws Exception {
+
+        RequestContext.testSetCurrentContext(context);
+        preFilter.run();
+    }
+
 }
